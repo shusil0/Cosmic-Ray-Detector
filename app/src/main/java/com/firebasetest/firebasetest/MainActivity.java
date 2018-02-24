@@ -28,7 +28,6 @@ import static com.firebasetest.firebasetest.R.id.image;
 
 public class MainActivity extends AppCompatActivity {
 
-
     private FirebaseStorage firebaseStorage;
     private StorageReference storageReference;
 
@@ -49,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
         final EditText editText = (EditText) findViewById(R.id.value);
         Button button = (Button) findViewById(R.id.btnToUpload);
         Button button1 = (Button) findViewById(R.id.picUpload);
-
+        Button button2 = (Button) findViewById(R.id.capture);
 
 // Write a message to the database
         FirebaseDatabase database = FirebaseDatabase.getInstance();
@@ -74,6 +73,14 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        button2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent i = new Intent(getApplicationContext(), cameraAccess.class);
+                startActivity(i);
+            }
+        });
+
 
     }
 
@@ -93,7 +100,6 @@ public class MainActivity extends AppCompatActivity {
             }).addOnFailureListener(new OnFailureListener() {
                 @Override
                 public void onFailure(@NonNull Exception e) {
-
                     Toast.makeText(MainActivity.this, "Upload Failed", Toast.LENGTH_LONG).show();
 
                 }
