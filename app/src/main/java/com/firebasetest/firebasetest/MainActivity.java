@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -67,9 +68,14 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                Intent i = new Intent(Intent.ACTION_PICK);
-                i.setType("image/");
-                startActivityForResult(i, 1);
+                Intent i = new Intent((MediaStore.ACTION_IMAGE_CAPTURE));
+               // i.setType("image/");
+
+                if (i.resolveActivity(getApplicationContext().getPackageManager()) != null) {
+                    startActivityForResult(i, 1);
+                }
+
+              //  startActivityForResult(i, 1);
             }
         });
 

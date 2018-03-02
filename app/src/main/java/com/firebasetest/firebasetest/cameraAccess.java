@@ -16,6 +16,7 @@ import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.Image;
 import android.media.ImageReader;
+import android.net.Uri;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -30,6 +31,14 @@ import android.view.TextureView;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
+
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -47,6 +56,9 @@ public class cameraAccess extends AppCompatActivity {
 
     private Button btnCapture;
     private TextureView textureView;
+    private FirebaseStorage firebaseStorage;
+    private StorageReference storageReference;
+
 
     //Check state orientation of output image
     private static final SparseIntArray ORIENTATIONS = new SparseIntArray();
@@ -102,6 +114,18 @@ public class cameraAccess extends AppCompatActivity {
         assert textureView != null;
         textureView.setSurfaceTextureListener(textureListener);
         btnCapture = (Button) findViewById(R.id.btnCapture);
+
+
+        firebaseStorage = FirebaseStorage.getInstance();
+        storageReference = firebaseStorage.getReferenceFromUrl("gs://fir-test-3a7ad.appspot.com/");
+
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        final DatabaseReference myRef = database.getReference("message");
+
+
+
+
+
         btnCapture.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -177,12 +201,38 @@ public class cameraAccess extends AppCompatActivity {
                 }
             };
 
+
             reader.setOnImageAvailableListener(readerListener, mBackgroundHandler);
             final CameraCaptureSession.CaptureCallback captureListener = new CameraCaptureSession.CaptureCallback() {
                 @Override
                 public void onCaptureCompleted(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, @NonNull TotalCaptureResult result) {
                     super.onCaptureCompleted(session, request, result);
-                    Toast.makeText(cameraAccess.this, "Saved " + file, Toast.LENGTH_SHORT).show();
+
+
+                    Uri mfile = Uri.fromFile(new File(file.getPath()));
+                    StorageReference riversRef = storageReference.child("images").child(UUID.randomUUID().toString());
+
+                    riversRef.putFile(mfile)
+                            .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                                @Override
+                                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                                    // Get a URL to the uploaded content
+                                    Uri downloadUrl = taskSnapshot.getDownloadUrl();
+                                    Toast.makeText(cameraAccess.this, "Saved " + file, Toast.LENGTH_SHORT).show();
+                                }
+                            })
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception exception) {
+                                    // Handle unsuccessful uploads
+                                    // ...
+                                }
+                            });
+
+
+
+
+
                     createCameraPreview();
                 }
             };
